@@ -14,139 +14,42 @@ class DCGAN:
         self.latent_depth = latent_depth
         self.learning_rate = learning_rate
 
-        self.generator = torch.nn.Sequential()
-        self.generator.add_module(
-            "G_batch_norm_0",
-            torch.nn.BatchNorm1d(self.latent_depth)
-        )
-        self.generator.add_module(
-            "G_linear_0",
-            torch.nn.Linear(self.latent_depth, 256 * 4 * 4)
-        )
-        self.generator.add_module(
-            "G_unflatten_0",
-            torch.nn.Unflatten(1, (256, 4, 4))
-        )
-        self.generator.add_module(
-            "G_act_0",
-            torch.nn.ReLU()
-        )
-        self.generator.add_module(
-            "G_batch_norm_1",
-            torch.nn.BatchNorm2d(256)
-        )
-        self.generator.add_module(
-            "G_conv_trans_0",
-            torch.nn.ConvTranspose2d(256, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
-        )
-        self.generator.add_module(
-            "G_act_1",
-            torch.nn.ReLU()
-        )
-        self.generator.add_module(
-            "G_batch_norm_2",
-            torch.nn.BatchNorm2d(128)
-        )
-        self.generator.add_module(
-            "G_conv_trans_1",
-            torch.nn.ConvTranspose2d(128, 64, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2))
-        )
-        self.generator.add_module(
-            "G_act_2",
-            torch.nn.ReLU()
-        )
-        self.generator.add_module(
-            "G_batch_norm_3",
-            torch.nn.BatchNorm2d(64)
-        )
-        self.generator.add_module(
-            "G_conv_trans_2",
-            torch.nn.ConvTranspose2d(64, 32, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
-        )
-        self.generator.add_module(
-            "G_act_3",
-            torch.nn.ReLU()
-        )
-        self.generator.add_module(
-            "G_batch_norm_4",
-            torch.nn.BatchNorm2d(32)
-        )
-        self.generator.add_module(
-            "G_conv_trans_3",
-            torch.nn.ConvTranspose2d(32, 1, kernel_size=(3, 3), padding=(1, 1))
-        )
-        self.generator.add_module(
-            "G_act_4",
+        self.generator = torch.nn.Sequential(
+            torch.nn.BatchNorm1d(self.latent_depth),
+            torch.nn.Linear(self.latent_depth, 256 * 4 * 4),
+            torch.nn.Unflatten(1, (256, 4, 4)),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(256),
+            torch.nn.ConvTranspose2d(256, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1)),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.ConvTranspose2d(128, 64, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2)),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(64),
+            torch.nn.ConvTranspose2d(64, 32, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1)),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(32),
+            torch.nn.ConvTranspose2d(32, 1, kernel_size=(3, 3), padding=(1, 1)),
             torch.nn.Tanh()
         )
 
-        self.discriminator = torch.nn.Sequential()
-        self.discriminator.add_module(
-            "D_flatten_0",
-            torch.nn.Flatten()
-        )
-        self.discriminator.add_module(
-            "D_unflatten_0",
-            torch.nn.Unflatten(1, tuple([1] + self.feature_shape))
-        )
-        self.discriminator.add_module(
-            "D_batch_norm_0",
-            torch.nn.BatchNorm2d(1)
-        )
-        self.discriminator.add_module(
-            "D_conv_0",
-            torch.nn.Conv2d(1, 32, kernel_size=(3, 3), padding=(1, 1))
-        )
-        self.discriminator.add_module(
-            "D_act_0",
-            torch.nn.LeakyReLU(negative_slope=0.2)
-        )
-        self.discriminator.add_module(
-            "D_batch_norm_1",
-            torch.nn.BatchNorm2d(32)
-        )
-        self.discriminator.add_module(
-            "D_conv_1",
-            torch.nn.Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
-        )
-        self.discriminator.add_module(
-            "D_act_1",
-            torch.nn.LeakyReLU(negative_slope=0.2)
-        )
-        self.discriminator.add_module(
-            "D_batch_norm_2",
-            torch.nn.BatchNorm2d(64)
-        )
-        self.discriminator.add_module(
-            "D_conv_2",
-            torch.nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
-        )
-        self.discriminator.add_module(
-            "D_act_2",
-            torch.nn.LeakyReLU(negative_slope=0.2)
-        )
-        self.discriminator.add_module(
-            "D_batch_norm_3",
-            torch.nn.BatchNorm2d(128)
-        )
-        self.discriminator.add_module(
-            "D_conv_3",
-            torch.nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
-        )
-        self.discriminator.add_module(
-            "D_act_3",
-            torch.nn.LeakyReLU(negative_slope=0.2)
-        )
-        self.discriminator.add_module(
-            "D_flatten_1",
-            torch.nn.Flatten()
-        )
-        self.discriminator.add_module(
-            "D_batch_norm_4",
-            torch.nn.BatchNorm1d(256 * 4 * 4)
-        )
-        self.discriminator.add_module(
-            "D_linear_0", 
+        self.discriminator = torch.nn.Sequential(
+            torch.nn.Flatten(),
+            torch.nn.Unflatten(1, tuple([1] + self.feature_shape)),
+            torch.nn.BatchNorm2d(1),
+            torch.nn.Conv2d(1, 32, kernel_size=(3, 3), padding=(1, 1)),
+            torch.nn.LeakyReLU(negative_slope=0.2),
+            torch.nn.BatchNorm2d(32),
+            torch.nn.Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1)),
+            torch.nn.LeakyReLU(negative_slope=0.2),
+            torch.nn.BatchNorm2d(64),
+            torch.nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1)),
+            torch.nn.LeakyReLU(negative_slope=0.2),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1)),
+            torch.nn.LeakyReLU(negative_slope=0.2),
+            torch.nn.Flatten(),
+            torch.nn.BatchNorm1d(256 * 4 * 4),
             torch.nn.Linear(256 * 4 * 4, 1)
         )
 
