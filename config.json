@@ -1,7 +1,13 @@
 {
-    "GAN": {
-        "LATENT_DEPTH": 20,
-        "BATCH_SIZE": 32,
-        "NUM_EPOCHS": 100
+    "dataset_path": "../../datasets/mnist-in-csv/",
+    "gan": {
+        "latent_depth": 20,
+        "batch_size": 32,
+        "num_epochs": 100
+    },
+    "dcgan": {
+        "latent_depth": 20,
+        "batch_size": 32,
+        "num_epochs": 100
     }
 }
