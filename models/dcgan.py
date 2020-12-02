@@ -19,7 +19,7 @@ class DCGAN:
             torch.nn.Linear(self.latent_depth, 256 * 4 * 4, bias=False),
             torch.nn.Unflatten(1, (256, 4, 4)),
             torch.nn.BatchNorm2d(256),
-            torch.nn.ReLU(),
+            torch.nn.ReLU(inplace=True),
 
             torch.nn.ConvTranspose2d(
                 256, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False
