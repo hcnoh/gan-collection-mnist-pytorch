@@ -6,8 +6,8 @@
         "num_epochs": 100
     },
     "dcgan": {
-        "latent_depth": 20,
-        "batch_size": 32,
+        "latent_depth": 100,
+        "batch_size": 64,
         "num_epochs": 100
     }
 }
