@@ -52,25 +52,25 @@ class DCGAN:
             torch.nn.Conv2d(
                 1, 32, kernel_size=(3, 3), padding=(1, 1), bias=False
             ),
-            torch.nn.BatchNorm2d(1),
+            torch.nn.BatchNorm2d(32),
             torch.nn.LeakyReLU(negative_slope=0.2),
 
             torch.nn.Conv2d(
                 32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False
             ),
-            torch.nn.BatchNorm2d(32),
+            torch.nn.BatchNorm2d(64),
             torch.nn.LeakyReLU(negative_slope=0.2),
 
             torch.nn.Conv2d(
                 64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False
             ),
-            torch.nn.BatchNorm2d(64),
+            torch.nn.BatchNorm2d(128),
             torch.nn.LeakyReLU(negative_slope=0.2),
 
             torch.nn.Conv2d(
                 128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False
             ),
-            torch.nn.BatchNorm2d(128),
+            torch.nn.BatchNorm2d(256),
             torch.nn.LeakyReLU(negative_slope=0.2),
 
             torch.nn.Flatten(),
