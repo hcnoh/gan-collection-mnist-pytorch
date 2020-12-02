@@ -7,9 +7,10 @@ class GAN:
         self,
         feature_depth,
         latent_depth,
+        cuda,
         learning_rate=0.0002,
         generator_hidden_dims=[128, 256, 256],
-        discriminator_hidden_dims=[256, 256, 128]
+        discriminator_hidden_dims=[256, 256, 128],
     ):
         self.feature_depth = feature_depth
         self.latent_depth = latent_depth
@@ -50,14 +51,21 @@ class GAN:
             torch.nn.Linear(discriminator_hidden_dims[-1], 1)
         )
 
+        if cuda:
+            self.generator = self.generator.cuda()
+            self.discriminator = self.discriminator.cuda()
+
         self.generator_opt = torch.optim.Adam(self.generator.parameters(), lr=self.learning_rate)
         self.discriminator_opt = torch.optim.Adam(self.discriminator.parameters(), lr=self.learning_rate)
     
-    def train_one_step(self, real_samples):
+    def train_one_step(self, real_samples, cuda):
         batch_size = real_samples.shape[0]
 
         real_samples = torch.tensor(real_samples).float()
         noises = torch.tensor(np.random.normal(size=[batch_size, self.latent_depth])).float()
+        if cuda:
+            real_samples = real_samples.cuda()
+            noises = noises.cuda()
 
         self.generator.train()
         self.discriminator.train()
@@ -92,13 +100,16 @@ class GAN:
 
         return generator_loss.item(), discriminator_loss.item()
     
-    def generate(self, batch_size, noises=None):
+    def generate(self, batch_size, cuda, noises=None):
         if noises == None:
             noises = torch.tensor(
                 np.random.normal(size=[batch_size, self.latent_depth])
             ).float()
         else:
             noises = torch.tensor(noises).float()
+        
+        if cuda:
+            noises = noises.cuda()
 
         self.generator.eval()
         faked_samples = self.generator(noises)

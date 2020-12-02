@@ -7,6 +7,7 @@ class DCGAN:
         self,
         feature_shape,
         latent_depth,
+        cuda,
         learning_rate=0.0002
     ):
         self.feature_shape = feature_shape
@@ -17,25 +18,25 @@ class DCGAN:
         self.generator = torch.nn.Sequential(
             torch.nn.Linear(self.latent_depth, 256 * 4 * 4, bias=False),
             torch.nn.Unflatten(1, (256, 4, 4)),
-            # torch.nn.BatchNorm2d(256),
+            torch.nn.BatchNorm2d(256),
             torch.nn.ReLU(),
 
             torch.nn.ConvTranspose2d(
                 256, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False
             ),
-            # torch.nn.BatchNorm2d(128),
+            torch.nn.BatchNorm2d(128),
             torch.nn.ReLU(),
 
             torch.nn.ConvTranspose2d(
                 128, 64, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2), bias=False
             ),
-            # torch.nn.BatchNorm2d(64),
+            torch.nn.BatchNorm2d(64),
             torch.nn.ReLU(),
 
             torch.nn.ConvTranspose2d(
                 64, 32, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False
             ),
-            # torch.nn.BatchNorm2d(32),
+            torch.nn.BatchNorm2d(32),
             torch.nn.ReLU(),
 
             torch.nn.ConvTranspose2d(
@@ -81,15 +82,22 @@ class DCGAN:
             torch.nn.init.normal_(param, std=0.02)
         for param in self.discriminator.parameters():
             torch.nn.init.normal_(param, std=0.02)
+        
+        if cuda:
+            self.generator = self.generator.cuda()
+            self.discriminator = self.discriminator.cuda()
 
         self.generator_opt = torch.optim.Adam(self.generator.parameters(), lr=self.learning_rate, betas=(0.5, 0.999))
         self.discriminator_opt = torch.optim.Adam(self.discriminator.parameters(), lr=self.learning_rate, betas=(0.5, 0.999))
     
-    def train_one_step(self, real_samples):
+    def train_one_step(self, real_samples, cuda):
         batch_size = real_samples.shape[0]
 
         real_samples = torch.tensor(real_samples).float()
         noises = torch.tensor(np.random.uniform(-1, 1, size=[batch_size, self.latent_depth])).float()
+        if cuda:
+            real_samples = real_samples.cuda()
+            noises = noises.cuda()
 
         self.generator.train()
         self.discriminator.train()
@@ -124,13 +132,16 @@ class DCGAN:
 
         return generator_loss.item(), discriminator_loss.item()
     
-    def generate(self, batch_size, noises=None):
+    def generate(self, batch_size, cuda, noises=None):
         if noises == None:
             noises = torch.tensor(
                 np.random.uniform(-1, 1, size=[batch_size, self.latent_depth])
             ).float()
         else:
             noises = torch.tensor(noises).float()
+
+        if cuda:
+            noises = noises.cuda()
 
         self.generator.eval()
         faked_samples = self.generator(noises)
