@@ -93,8 +93,8 @@ class DCGAN:
     def train_one_step(self, real_samples, cuda):
         batch_size = real_samples.shape[0]
 
-        real_samples = torch.tensor(real_samples).float()
-        noises = torch.tensor(np.random.uniform(-1, 1, size=[batch_size, self.latent_depth])).float()
+        real_samples = torch.FloatTensor(real_samples)
+        noises = torch.FloatTensor(np.random.uniform(-1, 1, size=[batch_size, self.latent_depth]))
         if cuda:
             real_samples = real_samples.cuda()
             noises = noises.cuda()
@@ -134,11 +134,11 @@ class DCGAN:
     
     def generate(self, batch_size, cuda, noises=None):
         if noises == None:
-            noises = torch.tensor(
+            noises = torch.FloatTensor(
                 np.random.uniform(-1, 1, size=[batch_size, self.latent_depth])
-            ).float()
+            )
         else:
-            noises = torch.tensor(noises).float()
+            noises = torch.FloatTensor(noises)
 
         if cuda:
             noises = noises.cuda()

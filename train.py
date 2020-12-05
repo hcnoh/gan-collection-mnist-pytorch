@@ -85,7 +85,7 @@ def main(model_name):
         )
 
         faked_samples = feature_denormalize(model.generate(config["batch_size"], cuda))
-        generated_images.append(faked_samples)
+        generated_images.append(faked_samples.detach().numpy())
 
         with open(ckpt_path + "results.pkl", "wb") as f:
             pickle.dump((generator_losses_epoch, discriminator_losses_epoch, generated_images), f)
