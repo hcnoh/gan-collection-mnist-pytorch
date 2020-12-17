@@ -1,13 +1,18 @@
 import numpy as np
 import torch
 
+if torch.cuda.is_available():
+    from torch.cuda import FloatTensor
+    torch.set_default_tensor_type(torch.cuda.FloatTensor)
+else:
+    from torch import FloatTensor
+
 
 class DCGAN:
     def __init__(
         self,
         feature_shape,
         latent_depth,
-        cuda,
         learning_rate=0.0002
     ):
         self.feature_shape = feature_shape
@@ -83,21 +88,18 @@ class DCGAN:
         for param in self.discriminator.parameters():
             torch.nn.init.normal_(param, std=0.02)
         
-        if cuda:
-            self.generator = self.generator.cuda()
-            self.discriminator = self.discriminator.cuda()
+        if torch.cuda.is_available():
+            self.generator.to(torch.device("cuda"))
+            self.discriminator.to(torch.device("cuda"))
 
         self.generator_opt = torch.optim.Adam(self.generator.parameters(), lr=self.learning_rate, betas=(0.5, 0.999))
         self.discriminator_opt = torch.optim.Adam(self.discriminator.parameters(), lr=self.learning_rate, betas=(0.5, 0.999))
     
-    def train_one_step(self, real_samples, cuda):
+    def train_one_step(self, real_samples):
         batch_size = real_samples.shape[0]
 
-        real_samples = torch.FloatTensor(real_samples)
-        noises = torch.FloatTensor(np.random.uniform(-1, 1, size=[batch_size, self.latent_depth]))
-        if cuda:
-            real_samples = real_samples.cuda()
-            noises = noises.cuda()
+        real_samples = FloatTensor(real_samples)
+        noises = FloatTensor(np.random.uniform(-1, 1, size=[batch_size, self.latent_depth]))
 
         self.generator.train()
         self.discriminator.train()
@@ -132,16 +134,13 @@ class DCGAN:
 
         return generator_loss.item(), discriminator_loss.item()
     
-    def generate(self, batch_size, cuda, noises=None):
+    def generate(self, batch_size, noises=None):
         if noises == None:
-            noises = torch.FloatTensor(
+            noises = FloatTensor(
                 np.random.uniform(-1, 1, size=[batch_size, self.latent_depth])
             )
         else:
-            noises = torch.FloatTensor(noises)
-
-        if cuda:
-            noises = noises.cuda()
+            noises = FloatTensor(noises)
 
         self.generator.eval()
         faked_samples = self.generator(noises)

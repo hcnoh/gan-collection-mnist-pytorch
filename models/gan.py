@@ -1,13 +1,18 @@
 import numpy as np
 import torch
 
+if torch.cuda.is_available():
+    from torch.cuda import FloatTensor
+    torch.set_default_tensor_type(torch.cuda.FloatTensor)
+else:
+    from torch import FloatTensor
+
 
 class GAN:
     def __init__(
         self,
         feature_depth,
         latent_depth,
-        cuda,
         learning_rate=0.0002,
         generator_hidden_dims=[128, 256, 256],
         discriminator_hidden_dims=[256, 256, 128],
@@ -51,21 +56,18 @@ class GAN:
             torch.nn.Linear(discriminator_hidden_dims[-1], 1)
         )
 
-        if cuda:
-            self.generator = self.generator.cuda()
-            self.discriminator = self.discriminator.cuda()
+        if torch.cuda.is_available():
+            self.generator.to(torch.device("cuda"))
+            self.discriminator.to(torch.device("cuda"))
 
         self.generator_opt = torch.optim.Adam(self.generator.parameters(), lr=self.learning_rate)
         self.discriminator_opt = torch.optim.Adam(self.discriminator.parameters(), lr=self.learning_rate)
     
-    def train_one_step(self, real_samples, cuda):
+    def train_one_step(self, real_samples):
         batch_size = real_samples.shape[0]
 
-        real_samples = torch.FloatTensor(real_samples)
-        noises = torch.FloatTensor(np.random.normal(size=[batch_size, self.latent_depth]))
-        if cuda:
-            real_samples = real_samples.cuda()
-            noises = noises.cuda()
+        real_samples = FloatTensor(real_samples)
+        noises = FloatTensor(np.random.normal(size=[batch_size, self.latent_depth]))
 
         self.generator.train()
         self.discriminator.train()
@@ -100,16 +102,13 @@ class GAN:
 
         return generator_loss.item(), discriminator_loss.item()
     
-    def generate(self, batch_size, cuda, noises=None):
+    def generate(self, batch_size, noises=None):
         if noises == None:
-            noises = torch.FloatTensor(
+            noises = FloatTensor(
                 np.random.normal(size=[batch_size, self.latent_depth])
             )
         else:
-            noises = torch.FloatTensor(noises)
-        
-        if cuda:
-            noises = noises.cuda()
+            noises = FloatTensor(noises)
 
         self.generator.eval()
         faked_samples = self.generator(noises)

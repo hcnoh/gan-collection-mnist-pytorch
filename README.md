@@ -1,5 +1,5 @@
 # GAN Collection for Generating MNIST Images with PyTorch
-This repository is a collection of GANs to generate MNIST datset. The deep learning framework for this repositoy is PyTorch.
+This repository is a collection of GANs to generate MNIST dataset. The deep learning framework for this repositoy is PyTorch.
 
 More GAN models will be provided on this repository.
 

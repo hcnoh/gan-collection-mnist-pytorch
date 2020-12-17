@@ -36,12 +36,10 @@ def main(model_name):
     
     loader = MNISTLoader()
 
-    cuda = torch.cuda.is_available()
-
     if model_name == "gan":
-        model = GAN(loader.feature_depth, config["latent_depth"], cuda)
+        model = GAN(loader.feature_depth, config["latent_depth"])
     elif model_name == "dcgan":
-        model = DCGAN(loader.feature_shape, config["latent_depth"], cuda)
+        model = DCGAN(loader.feature_shape, config["latent_depth"])
 
     steps_per_epoch = (loader.num_train_sets + loader.num_test_sets) // config["batch_size"]
 
@@ -63,7 +61,7 @@ def main(model_name):
                 )
             real_samples = features[sampled_indices]
 
-            generator_loss, discriminator_loss = model.train_one_step(real_samples, cuda)
+            generator_loss, discriminator_loss = model.train_one_step(real_samples)
 
             generator_loss_epoch.append(generator_loss)
             discriminator_loss_epoch.append(discriminator_loss)
@@ -84,7 +82,7 @@ def main(model_name):
             model.discriminator.state_dict(), ckpt_path + "discriminator_%i.ckpt" % i
         )
 
-        faked_samples = feature_denormalize(model.generate(config["batch_size"], cuda))
+        faked_samples = feature_denormalize(model.generate(config["batch_size"]))
         generated_images.append(faked_samples.detach().numpy())
 
         with open(ckpt_path + "results.pkl", "wb") as f:
